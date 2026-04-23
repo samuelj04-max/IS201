@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiger Woods Trivia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1B4D2E;
+            --green-dark: #112e1b;
+            --green-light: #226038;
+            --gold: #D4AF37;
+            --gold-light: #f0cc5a;
+            --cream: #F5F0E8;
+            --white: #ffffff;
+            --gray: #555;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background-color: var(--green-dark);
+            color: var(--cream);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image:
+                radial-gradient(ellipse at top left, #2a6b40 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, #0d2b18 0%, transparent 50%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeDown 0.7s ease both;
+        }
+
+        .flag-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 0 2px 12px rgba(212,175,55,0.3);
+            line-height: 1.1;
+        }
+
+        .header p {
+            margin-top: 8px;
+            font-size: 1rem;
+            color: rgba(245,240,232,0.6);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .scorebar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            padding: 12px 24px;
+            margin-bottom: 24px;
+            animation: fadeDown 0.7s 0.1s ease both;
+        }
+
+        .scorebar-item {
+            text-align: center;
+        }
+
+        .scorebar-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(245,240,232,0.5);
+        }
+
+        .scorebar-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .progress-wrap {
+            width: 160px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 99px;
+            height: 6px;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 6px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 99px;
+            transition: width 0.5s ease;
+        }
+
+        .card {
+            background: var(--white);
+            color: #1a1a1a;
+            border-radius: 16px;
+            padding: 36px 40px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(212,175,55,0.15);
+            animation: fadeUp 0.5s ease both;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .question-num {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            font-weight: 700;
+            color: var(--green-dark);
+            line-height: 1.4;
+            margin-bottom: 28px;
+            flex-grow: 1;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #f7f4ef;
+            border: 2px solid #e0d8cc;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2a2a2a;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #eef7f1;
+            border-color: var(--green);
+            color: var(--green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(27,77,46,0.15);
+        }
+
+        .option-btn.correct {
+            background: #d4f0dd;
+            border-color: #2d9e52;
+            color: #1a5c30;
+        }
+
+        .option-btn.wrong {
+            background: #fde8e8;
+            border-color: #e05555;
+            color: #8b2020;
+        }
+
+        .option-btn:disabled { cursor: default; }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: none;
+            animation: pop 0.3s ease;
+        }
+
+        .feedback.show { display: block; }
+        .feedback.correct { background: #d4f0dd; color: #1a5c30; }
+        .feedback.wrong   { background: #fde8e8; color: #8b2020; }
+
+        .feedback .fact {
+            font-weight: 400;
+            margin-top: 4px;
+            font-size: 0.88rem;
+            opacity: 0.85;
+        }
+
+        .next-btn {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--green), var(--green-light));
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(27,77,46,0.4);
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(27,77,46,0.5);
+        }
+
+        .next-btn.show { display: block; animation: fadeUp 0.3s ease; }
+
+        .results {
+            display: none;
+            text-align: center;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .results.show { display: block; }
+
+        .results-trophy {
+            font-size: 5rem;
+            margin-bottom: 16px;
+            display: block;
+            animation: bounce 1s ease 0.3s both;
+        }
+
+        .results h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .results .score-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1;
+            margin: 16px 0;
+        }
+
+        .results .score-display span {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .results-message {
+            font-size: 1.1rem;
+            color: rgba(245,240,232,0.75);
+            margin-bottom: 32px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .play-again-btn {
+            padding: 16px 48px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--green-dark);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(212,175,55,0.5);
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pop {
+            0%   { transform: scale(0.95); opacity: 0; }
+            60%  { transform: scale(1.02); }
+            100% { transform: scale(1);    opacity: 1; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            40%       { transform: translateY(-20px); }
+            60%       { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 500px) {
+            .card { padding: 24px 20px; }
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <span class="flag-icon">⛳</span>
+        <h1>Tiger Woods Trivia</h1>
+        <p>How well do you know the greatest golfer of all time?</p>
+    </div>
+
+    <div class="scorebar" id="scorebar">
+        <div class="scorebar-item">
+            <div class="scorebar-label">Score</div>
+            <div class="scorebar-value" id="scoreDisplay">0</div>
+        </div>
+        <div class="scorebar-item">
+            <div class="scorebar-label">Progress</div>
+            <div class="progress-wrap">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div style="font-size:0.75rem; color:rgba(245,240,232,0.5); margin-top:4px;" id="progressText">0 / 10</div>
+        </div>
+        <div class="scorebar-item">
+            <div class="scorebar-label">Streak 🔥</div>
+            <div class="scorebar-value" id="streakDisplay">0</div>
+        </div>
+    </div>
+
+    <div class="card" id="quizCard">
+        <div>
+            <div class="question-num" id="questionNum">Question 1 of 10</div>
+            <div class="question-text" id="questionText">Loading...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedback">
+                <div id="feedbackTitle"></div>
+                <div class="fact" id="feedbackFact"></div>
+            </div>
+        </div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+    </div>
+
+    <div class="results" id="results">
+        <span class="results-trophy" id="trophyEmoji">🏆</span>
+        <h2 id="resultsTitle">Quiz Complete!</h2>
+        <div class="score-display" id="finalScore">0 <span>/ 10</span></div>
+        <p class="results-message" id="resultsMessage"></p>
+        <button class="play-again-btn" onclick="restartQuiz()">Play Again</button>
+    </div>
+
+</div>
+
+<script>
+    const allQuestions = [
+        {
+            q: "How many major championships has Tiger Woods won in his career?",
+            options: ["13", "15", "17", "18"],
+            answer: 1,
+            fact: "Tiger's 15 majors is second all-time behind Jack Nicklaus (18)."
+        },
+        {
+            q: "At what age did Tiger Woods win his first Masters Tournament?",
+            options: ["19", "20", "21", "22"],
+            answer: 2,
+            fact: "Tiger won the 1997 Masters at 21 years old by a record 12 strokes."
+        },
+        {
+            q: "How many PGA Tour wins does Tiger Woods have, tying him for the all-time record?",
+            options: ["75", "78", "80", "82"],
+            answer: 3,
+            fact: "Tiger is tied with Sam Snead at 82 PGA Tour victories."
+        },
+        {
+            q: "What is the name of Tiger's achievement of winning all four majors consecutively?",
+            options: ["The Golden Slam", "The Tiger Slam", "The Grand Tiger", "The Woods Sweep"],
+            answer: 1,
+            fact: "The Tiger Slam (2000–2001) is the only time anyone has held all four major titles at once."
+        },
+        {
+            q: "How many total weeks has Tiger Woods spent ranked as the world's #1 golfer?",
+            options: ["421", "521", "683", "750"],
+            answer: 2,
+            fact: "683 weeks — more than double the next highest, Greg Norman (331 weeks)."
+        },
+        {
+            q: "Which college did Tiger Woods attend before turning professional?",
+            options: ["USC", "UCLA", "Stanford", "Duke"],
+            answer: 2,
+            fact: "Tiger attended Stanford University and won two NCAA individual titles there."
+        },
+        {
+            q: "In what year did Tiger Woods make his famous comeback by winning the Masters?",
+            options: ["2017", "2018", "2019", "2020"],
+            answer: 2,
+            fact: "The 2019 Masters victory is considered one of the greatest comebacks in sports history."
+        },
+        {
+            q: "At what age did Tiger Woods become the youngest golfer to complete the career Grand Slam?",
+            options: ["22", "23", "24", "25"],
+            answer: 2,
+            fact: "Tiger completed the career Grand Slam at age 24 at the 2000 British Open."
+        },
+        {
+            q: "How many consecutive weeks did Tiger hold the #1 world ranking at his longest streak?",
+            options: ["200", "240", "281", "310"],
+            answer: 2,
+            fact: "Tiger held #1 for 281 consecutive weeks — the longest streak in golf history."
+        },
+        {
+            q: "Where is the Masters Tournament held every year?",
+            options: ["Pebble Beach", "Augusta National", "St Andrews", "Pinehurst"],
+            answer: 1,
+            fact: "Augusta National Golf Club in Augusta, Georgia has hosted the Masters since 1934."
+        },
+        {
+            q: "What year did Tiger Woods turn professional?",
+            options: ["1994", "1995", "1996", "1997"],
+            answer: 2,
+            fact: "Tiger turned pro in August 1996 and won his first PGA Tour event just weeks later."
+        },
+        {
+            q: "Which golfer's all-time record for PGA Tour wins is Tiger tied with?",
+            options: ["Jack Nicklaus", "Arnold Palmer", "Ben Hogan", "Sam Snead"],
+            answer: 3,
+            fact: "Sam Snead won 82 PGA Tour events. Tiger matched that record in 2019."
+        },
+    ];
+
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let streak = 0;
+    let answered = false;
+
+    function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+        questions = shuffle(allQuestions).slice(0, 10);
+        current = 0; score = 0; streak = 0;
+        document.getElementById('results').classList.remove('show');
+        document.getElementById('quizCard').style.display = 'flex';
+        document.getElementById('scorebar').style.display = 'flex';
+        updateScorebar();
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[current];
+        document.getElementById('questionNum').textContent = `Question ${current + 1} of ${questions.length}`;
+        document.getElementById('questionText').textContent = q.q;
+
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => selectAnswer(i);
+            container.appendChild(btn);
+        });
+
+        const fb = document.getElementById('feedback');
+        fb.className = 'feedback';
+        document.getElementById('nextBtn').className = 'next-btn';
+
+        const card = document.getElementById('quizCard');
+        card.style.animation = 'none';
+        card.offsetHeight;
+        card.style.animation = 'fadeUp 0.4s ease both';
+    }
+
+    function selectAnswer(index) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[current];
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(b => b.disabled = true);
+
+        const fb = document.getElementById('feedback');
+        const fbTitle = document.getElementById('feedbackTitle');
+        const fbFact = document.getElementById('feedbackFact');
+
+        if (index === q.answer) {
+            buttons[index].classList.add('correct');
+            score++;
+            streak++;
+            fb.className = 'feedback correct show';
+            fbTitle.textContent = '✅ Correct!';
+        } else {
+            buttons[index].classList.add('wrong');
+            buttons[q.answer].classList.add('correct');
+            streak = 0;
+            fb.className = 'feedback wrong show';
+            fbTitle.textContent = '❌ Not quite!';
+        }
+
+        fbFact.textContent = q.fact;
+        updateScorebar();
+        document.getElementById('nextBtn').className = 'next-btn show';
+    }
+
+    function nextQuestion() {
+        current++;
+        if (current >= questions.length) {
+            showResults();
+        } else {
+            loadQuestion();
+        }
+    }
+
+    function updateScorebar() {
+        document.getElementById('scoreDisplay').textContent = score;
+        document.getElementById('streakDisplay').textContent = streak;
+        const pct = (current / questions.length) * 100;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressText').textContent = `${current} / ${questions.length}`;
+    }
+
+    function showResults() {
+        document.getElementById('quizCard').style.display = 'none';
+        document.getElementById('scorebar').style.display = 'none';
+
+        const pct = score / questions.length;
+        let emoji, title, message;
+
+        if (pct === 1) {
+            emoji = '🏆'; title = 'Perfect Round!';
+            message = "You're a true Tiger Woods expert. A flawless performance — just like the 1997 Masters.";
+        } else if (pct >= 0.8) {
+            emoji = '🦁'; title = 'Major Champion!';
+            message = "Outstanding knowledge! You clearly follow the career of the greatest golfer of all time.";
+        } else if (pct >= 0.6) {
+            emoji = '⛳'; title = 'Solid Round!';
+            message = "Good effort! You know your Tiger facts, but there's still room to sharpen your game.";
+        } else if (pct >= 0.4) {
+            emoji = '🏌️'; title = 'Keep Practicing!';
+            message = "A decent attempt, but Tiger would say: 'The hard work is what makes it happen.' Study up!";
+        } else {
+            emoji = '🌿'; title = "Beginner's Luck?";
+            message = "Looks like you need a caddie! Head back to the fan page and brush up on Tiger's incredible career.";
+        }
+
+        document.getElementById('trophyEmoji').textContent = emoji;
+        document.getElementById('resultsTitle').textContent = title;
+        document.getElementById('finalScore').innerHTML = `${score} <span>/ ${questions.length}</span>`;
+        document.getElementById('resultsMessage').textContent = message;
+        document.getElementById('results').classList.add('show');
+    }
+
+    function restartQuiz() {
+        document.getElementById('quizCard').style.display = 'flex';
+        document.getElementById('scorebar').style.display = 'flex';
+        startQuiz();
+    }
+
+    startQuiz();
+</script>
+</body>
+</html>
